@@ -285,15 +285,15 @@ ggsave("./Figures/SI/Figure_RF_regular.pdf",p_tot_RF,width = 8,height = 4.5)
 d=read.table("./Data/data_sites_CLIM.csv",sep=";")%>%
   Closer_to_normality(.)%>%
   Perform_PCA_spatial_struc(.)%>%
-  mutate(., Sand=bcPower(.$Sand,6))%>%
-  mutate(across(colnames(dplyr::select_if(., is.numeric)),~ (. - mean(.,na.rm=T)) / sd(.,na.rm = T)))
+  mutate(., Sand=bcPower(.$Sand,6))
 d=Is_biome_desert(d,name_variable = "Biome_Current","Desert_Current")
 d=Is_biome_desert(d,name_variable = "Biome_LGM","Desert_LGM")
 d=d%>%
   dplyr::mutate(.,
                 Desert_Current=as.factor(as.numeric(Desert_Current=="Desert")),
                 Desert_LGM=as.factor(as.numeric(Desert_LGM=="Desert")))%>%
-  dplyr::select(.,-Biome_LGM,-Biome_Current)
+  dplyr::select(.,-Biome_LGM,-Biome_Current)%>%
+  dplyr::mutate(across(colnames(dplyr::select_if(., is.numeric)),~ (. - mean(.,na.rm=T)) / sd(.,na.rm = T)))
 
 library(piecewiseSEM)
 d_site=dplyr::distinct(d,Site_ID,.keep_all = T)
@@ -467,7 +467,7 @@ for (k in 1:2){
            facet_wrap(.~Response,scales="free")+
            # scale_fill_manual(values=c("Soil"="#A2D086","LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
            scale_color_manual(values=c("Soil"="#A2D086","LGM legacy"="#FFE699","Holocene legacy"="#F3A875","Current climate"="#A97858"))+
-           scale_alpha_manual(values=c(.2,1,1))+
+           scale_alpha_manual(values=c(.2,1,.2))+
            # scale_color_manual(values=c("grey","black"))+
            geom_hline(yintercept = 0)+
            labs(y=c("Total effect on PC1: \n mean patch-size and cover","Total effect on PC2: \n spatial aggregation")[k],fill="",color="",x="Predictor")+
@@ -529,8 +529,8 @@ ggsave("./Figures/SI/SEM_sand_MF.pdf",p_tot,width = 7,height = 4)
 d=read.table("./Data/data_sites_CLIM.csv",sep=";")%>%
   Closer_to_normality(.)%>%
   Perform_PCA_spatial_struc(.)%>%
-  mutate(., Sand=bcPower(.$Sand,6))%>%
-  mutate(across(colnames(dplyr::select_if(., is.numeric)),~ (. - mean(.,na.rm=T)) / sd(.,na.rm = T)))
+  dplyr::mutate(., Sand=bcPower(.$Sand,6))%>%
+  dplyr::mutate(across(colnames(dplyr::select_if(., is.numeric)),~ (. - mean(.,na.rm=T)) / sd(.,na.rm = T)))
 d=Is_biome_desert(d,name_variable = "Biome_Current","Desert_Current")
 d=Is_biome_desert(d,name_variable = "Biome_LGM","Desert_LGM")
 d=d%>%
@@ -600,13 +600,13 @@ for (k in c("Isothermality_Holocene",
 d_points$Driver=as.numeric(d_points$Driver)
 d_res$Driver=as.numeric(d_res$Driver)
 
-for (id in 1:4){
+for (id in 1:3){
   assign(paste0("p",id),ggplot(d_res%>%
-                                 dplyr::filter(., Response=="Struct1", Fullname %in% c("MAP_LGM",
+                                 dplyr::filter(., Response=="Struct1", Fullname %in% c(
                                                                                        "Isothermality_LGM",
                                                                                        "Isothermality_Holocene",
                                                                                        "MAT_LGM")[id]))+
-           geom_point(data=d_points%>%dplyr::filter(., Response=="Struct1", Fullname %in% c("MAP_LGM",
+           geom_point(data=d_points%>%dplyr::filter(., Response=="Struct1", Fullname %in% c(
                                                                                             "Isothermality_LGM",
                                                                                             "Isothermality_Holocene",
                                                                                             "MAT_LGM")[id]),
@@ -633,26 +633,24 @@ p51=Increase_size_axes(ggplot(d_points%>%
     guides(color="none",fill="none"))
 
 
-p_tot1=ggarrange(Increase_size_axes(p1)+labs(x="Precipitation legacy LGM"),
-          Increase_size_axes(p2)+theme(axis.text.y = element_blank(),
-                   axis.ticks.y = element_blank(),
-                   axis.title.y = element_blank())+labs(x="Isothermality legacy LGM"),
+p_tot1=ggarrange(#Increase_size_axes(p1)+labs(x="Precipitation legacy LGM"),
+          Increase_size_axes(p2)+labs(x="Isothermality legacy LGM"),
           Increase_size_axes(p4)+theme(axis.text.y = element_blank(),
                    axis.ticks.y = element_blank(),
                    axis.title.y = element_blank())+labs(x="Temperature legacy LGM"),
           Increase_size_axes(p3)+theme(axis.text.y = element_blank(),
                    axis.ticks.y = element_blank(),
                    axis.title.y = element_blank())+labs(x="Isothermality legacy Holocene"),
-          ncol=4,widths = c(1.25,1,1,1),hjust = -1)
+          ncol=3,widths = c(1.25,1,1),hjust = -1)
 
-for (id in 1:4){
+for (id in 1:3){
   assign(paste0("p",id),ggplot(d_res%>%
                                  dplyr::filter(., Response=="Struct2", Fullname %in% c("Isothermality_Holocene",
-                                                                                       "MAT_Holocene",
+                                                                                       # "MAT_Holocene",
                                                                                        "Isothermality_LGM",
                                                                                        "MAT_LGM")[id]))+
            geom_point(data=d_points%>%dplyr::filter(., Response=="Struct2", Fullname %in% c("Isothermality_Holocene",
-                                                                                            "MAT_Holocene",
+                                                                                            # "MAT_Holocene",
                                                                                             "Isothermality_LGM",
                                                                                             "MAT_LGM")[id]),
                       aes(x=Driver,y=Points),alpha=.4,color="grey")+
@@ -684,18 +682,18 @@ p_tot2=ggarrange(Increase_size_axes(p3)+labs(x="Isothermality legacy LGM"),
                  Increase_size_axes(p1)+theme(axis.text.y = element_blank(),
                    axis.ticks.y = element_blank(),
                    axis.title.y = element_blank())+labs(x="Isothermality legacy Holocene"),
-                 Increase_size_axes(p2)+theme(axis.text.y = element_blank(),
-                   axis.ticks.y = element_blank(),
-                   axis.title.y = element_blank())+labs(x="Temperature legacy Holocene"),
-          ncol=4,widths = c(1.25,1,1,1))
+                 # Increase_size_axes(p2)+theme(axis.text.y = element_blank(),
+                 #   axis.ticks.y = element_blank(),
+                 #   axis.title.y = element_blank())+labs(x="Temperature legacy Holocene"),
+          ncol=3,widths = c(1.25,1,1))
 
-p_tot=ggarrange(p_tot1,p_tot2,nrow=2,labels = letters[1:2],hjust = c(-2,-1))
+p_tot=ggarrange(p_tot1,p_tot2,nrow=2,labels = letters[2:3],hjust = c(-2,-1))
 
-ggsave("./Figures/Partial_res.pdf",ggarrange(p_tot,
+ggsave("./Figures/Partial_res.pdf",ggarrange(
                                              ggarrange(ggplot()+theme_void(),p51+theme(axis.text.x = element_text(size=10)),p52+theme(axis.text.x = element_text(size=10)),
                                                        ggplot()+theme_void(),ncol=4,
-                                                       widths = c(.6,1,1,.6),labels = c("c","","",""),hjust = -11,
-                                                       font.label = list(size=15)),nrow=2,heights = c(1,.5)),width = 12,height = 8)
+                                                       widths = c(.6,1.5,1.5,.6),labels = c("a","","",""),hjust = -11,
+                                                       font.label = list(size=15)),p_tot,nrow=2,heights = c(.5,1)),width = 10,height = 8)
 
 
 
