@@ -20,19 +20,19 @@ p=ggplot(past_biome%>%Change_biome_name_LGM(.)%>%
   geom_sf(aes(fill=as.factor(Desert))) + 
   geom_point(data=tibble(Long=c(d_regular$Longitude,d_irregular$Longitude),
                          Lat=c(d_regular$Latitude,d_irregular$Lat),
-                         Type=c(rep("Dataset2: Regular patterns in the Sahel",each=nrow(d_regular)),
-                                rep("Dataset1: Global survey",each=nrow(d_irregular)))),
-             aes(x=Long,y=Lat,shape=Type)) + 
+                         Type=c(rep("Regular patterns in the Sahel",each=nrow(d_regular)),
+                                rep("Global survey",each=nrow(d_irregular)))),
+             aes(x=Long,y=Lat)) + 
   scale_fill_manual(values=c("#E8DCBB","#F5D992","#DCB95D","#B7912E","#7D6015","grey"))+
   scale_shape_manual(values=c(17,15))+
   coord_sf()+
   the_theme2+
-  guides(fill=guide_legend(nrow=3,byrow=TRUE))+
+  guides(fill=guide_legend(nrow=6,byrow=TRUE))+
   ggtitle("LGM biomes")+
-  theme( legend.box="vertical")+
+  theme( legend.box="vertical",legend.position = "right")+
   labs(fill="",shape="",x="Longitude",y="Latitude")
 
-ggsave("./Figures/Distribution_sites_regular_irregular.pdf",p,width = 6,height = 7)
+ggsave("./Figures/Distribution_sites_regular_irregular.pdf",p,width = 8,height = 6)
 
 
 ## >> BIOCOM partition variable and RF ----
@@ -111,8 +111,7 @@ for (ID_PC in 1:2){
            
            coord_flip()+
            the_theme2+
-           scale_fill_manual(values=c("LGM legacy"="#FFF9BF", "Holocene legacy"="#FFD2A0","Current climate"="pink",
-                                      "Shared past clim."="#DAB2BA","Other shared variance"="#E8E8E8"))+
+           scale_fill_manual(values=c("LGM legacy"="#FFF9BF", "Holocene legacy"="#FFD2A0","Current climate"="pink"))+
            labs(y="Mean Importance",x="",fill=""))
 }  
 
@@ -136,21 +135,18 @@ p_RF=ggarrange(
   ncol=2,common.legend = T,legend = "none")
 
 
-p_legend=get_legend(ggplot(tibble(ID=1:5,Name=c("LGM legacy","Holocene legacy",
-                                                "Current climate","Shared past clim.",
-                                                "Other shared variance")))+
+p_legend=get_legend(ggplot(tibble(ID=1:3,Name=c("LGM legacy","Holocene legacy",
+                                                "Current climate")))+
                       geom_bar(aes(x=1,y=1,fill=as.factor(Name)),stat="identity")+
                       scale_fill_manual(values=c("LGM legacy"="#FFF9BF",
                                                  "Holocene legacy"="#FFD2A0",
-                                                 "Current climate"="pink",
-                                                 "Shared past clim."="#DAB2BA",
-                                                 "Other shared variance"="#E8E8E8"))+
+                                                 "Current climate"="pink"))+
                       labs(fill="")+theme(legend.position = "bottom")
 )
 
 p_tot=ggarrange(
-  ggarrange(p0+the_theme2+theme(legend.position = "none"),
-            pvariance,ncol=2,widths = c(.7,1),labels = letters[1:2],align = "hv"),p_legend,nrow=2,heights = c(1,.15),align = "hv")
+  ggarrange(ggarrange(ggplot()+theme_void(),p0+the_theme2+theme(legend.position = "none"),ncol=2,widths = c(.18,1)),
+            pvariance,ncol=2,widths = c(.7,1),labels = letters[1:2],align = "hv"),ggplot()+theme_void(),p_legend,nrow=3,heights = c(1,.1,.15),align = "hv")
 
 ggsave("./Figures/Figure_irregular.pdf",p_tot,width = 9,height = 4.5)
 
@@ -231,8 +227,7 @@ for (ID_PC in 1:2){
            
            coord_flip()+
            the_theme2+
-           scale_fill_manual(values=c("LGM legacy"="#FFF9BF", "Holocene legacy"="#FFD2A0","Current climate"="pink",
-                                      "Shared past clim."="#DAB2BA","Other shared variance"="#E8E8E8"))+
+           scale_fill_manual(values=c("LGM legacy"="#FFF9BF", "Holocene legacy"="#FFD2A0","Current climate"="pink"))+
            labs(y="Mean Importance",x="",fill=""))
 }  
   
@@ -454,22 +449,23 @@ for (k in 1:2){
                                 add_column(.,Order=(1:(nrow(.))))%>%
                                 dplyr::group_by(., Response)%>%
                                 dplyr::mutate(.,Term=fct_reorder(Term,Order)))+
-           geom_linerange(aes(x=Variable,ymin=q1,y=q2,ymax=q3,group=interaction(Variable,Class),color=Class,alpha=Signif2),
+           geom_linerange(aes(x=Variable,ymin=q1,y=q2,ymax=q3,group=interaction(Variable,Class),color=Class,shape=Signif2),
                           position = position_dodge2(width = .8, preserve = "single"))+
-           geom_linerange(aes(x=Variable,ymin=q12,y=q2,ymax=q32,group=interaction(Variable,Class),color=Class,alpha=Signif2),
+           geom_linerange(aes(x=Variable,ymin=q12,y=q2,ymax=q32,group=interaction(Variable,Class),color=Class,shape=Signif2),
                           position = position_dodge2(width = .8, preserve = "single"),lwd=2)+
-           geom_point(aes(x=Variable,y=q2,group=interaction(Variable,Class),alpha=Signif2),color="black",
+           geom_point(aes(x=Variable,y=q2,group=interaction(Variable,Class),shape=Signif2),color="black",size=2,
                       position = position_dodge2(width = .8, preserve = "single"))+
            
            #facet_wrap(.~Response,scales="free")+
            the_theme2+
-           guides(alpha="none")+
+           guides(shape="none")+
            facet_wrap(.~Response,scales="free")+
-           # scale_fill_manual(values=c("Soil"="#A2D086","LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
-           scale_color_manual(values=c("Soil"="#A2D086","LGM legacy"="#FFE699","Holocene legacy"="#F3A875","Current climate"="#A97858"))+
-           scale_alpha_manual(values=c(.2,1,.2))+
+           # scale_fill_manual(values=c("Soil"="#A2D086","LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
+           scale_color_manual(values=c("Soil"="#A2D086","LGM legacy"="#FFE699","Holocene legacy"="#F3A875","Current climate"="#FAC1CB"))+
+           scale_shape_manual(values=c(1,19,1))+
            # scale_color_manual(values=c("grey","black"))+
            geom_hline(yintercept = 0)+
+           geom_vline(xintercept = c(1.5,2.5,3.5,4.5,5.5),linetype = 9)+
            labs(y=c("Total effect on PC1: \n mean patch-size and cover","Total effect on PC2: \n spatial aggregation")[k],fill="",color="",x="Predictor")+
            theme(strip.text.x.top = element_blank(),strip.text.y.top = element_blank())+
            coord_flip())
@@ -485,16 +481,16 @@ for (k in 1:2){
                           position = position_dodge2(width = .8, preserve = "single"))+
            geom_linerange(aes(x=Variable,ymin=q12,y=q2,ymax=q32,group=interaction(Variable,Class),color=Class,alpha=Signif2),
                           position = position_dodge2(width = .8, preserve = "single"),lwd=2)+
-           geom_point(aes(x=Variable,y=q2,group=interaction(Variable,Class),alpha=Signif2),color="black",
+           geom_point(aes(x=Variable,y=q2,group=interaction(Variable,Class),shape=Signif2),color="black",size=2,
                       position = position_dodge2(width = .8, preserve = "single"))+
            
            #facet_wrap(.~Response,scales="free")+
            the_theme2+
-           guides(alpha="none")+
+           guides(shape="none")+
            facet_wrap(.~Response,scales="free")+
-           # scale_fill_manual(values=c("Soil"="#A2D086","LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
-           scale_color_manual(values=c("Soil"="#A2D086","LGM legacy"="#FFE699","Holocene legacy"="#F3A875","Current climate"="#A97858"))+
-           scale_alpha_manual(values=c(.2,1,1))+
+           # scale_fill_manual(values=c("Soil"="#A2D086","LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
+           scale_color_manual(values=c("Soil"="#A2D086","LGM legacy"="#FFE699","Holocene legacy"="#F3A875","Current climate"="#FAC1CB"))+
+           scale_shape_manual(values=c(1,19,1))+
            # scale_color_manual(values=c("grey","black"))+
            geom_hline(yintercept = 0)+
            labs(y=c("Effect on sand soil content","Effect on multifunctionality")[k],fill="",color="",x="Predictor")+
@@ -615,8 +611,8 @@ for (id in 1:3){
            geom_ribbon(aes(x=Driver,y=Median,ymin=Lower,ymax=Upper,fill=Period),alpha=.4)+
            the_theme2+
            labs(x="",y="PC1: mean patch-size\n and cover",fill="")+
-           scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
-           scale_color_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
+           scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
+           scale_color_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
            theme(legend.text = element_text(size=12),strip.placement = "outside")+
            guides(color="none",fill="none"))
   
@@ -634,11 +630,18 @@ p51=Increase_size_axes(ggplot(d_points%>%
 
 
 p_tot1=ggarrange(#Increase_size_axes(p1)+labs(x="Precipitation legacy LGM"),
-          Increase_size_axes(p2)+labs(x="Isothermality legacy LGM"),
-          Increase_size_axes(p4)+theme(axis.text.y = element_blank(),
+          Increase_size_axes(p1+
+                               scale_fill_manual(values=c("#FFE699"))+
+                               scale_color_manual(values=c("#FFE699")))+
+            labs(x="Isothermality legacy LGM"),
+          Increase_size_axes(p3+
+                               scale_fill_manual(values=c("#FFE699"))+
+                               scale_color_manual(values=c("#FFE699")))+theme(axis.text.y = element_blank(),
                    axis.ticks.y = element_blank(),
                    axis.title.y = element_blank())+labs(x="Temperature legacy LGM"),
-          Increase_size_axes(p3)+theme(axis.text.y = element_blank(),
+          Increase_size_axes(p2+
+                               scale_fill_manual(values=c("#F3A875"))+
+                               scale_color_manual(values=c("#F3A875")))+theme(axis.text.y = element_blank(),
                    axis.ticks.y = element_blank(),
                    axis.title.y = element_blank())+labs(x="Isothermality legacy Holocene"),
           ncol=3,widths = c(1.25,1,1),hjust = -1)
@@ -658,8 +661,8 @@ for (id in 1:3){
            geom_ribbon(aes(x=Driver,y=Median,ymin=Lower,ymax=Upper,fill=Period),alpha=.4)+
            the_theme2+
            labs(x="",y="PC2: spatial\n aggregation",fill="")+
-           scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
-           scale_color_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
+           scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
+           scale_color_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
            theme(legend.text = element_text(size=12),strip.placement = "outside")+
            guides(color="none",fill="none"))
   
@@ -675,11 +678,17 @@ p52=Increase_size_axes(ggplot(d_points%>%
   scale_x_continuous(breaks = c(0,1),labels = c("No desert \n during LGM","Desert \n during LGM"))+
   guides(color="none",fill="none"))
 
-p_tot2=ggarrange(Increase_size_axes(p3)+labs(x="Isothermality legacy LGM"),
-                 Increase_size_axes(p4)+theme(axis.text.y = element_blank(),
+p_tot2=ggarrange(Increase_size_axes(p2+
+                                      scale_fill_manual(values=c("#FFE699"))+
+                                      scale_color_manual(values=c("#FFE699")))+labs(x="Isothermality legacy LGM"),
+                 Increase_size_axes(p3+
+                                      scale_fill_manual(values=c("#FFE699"))+
+                                      scale_color_manual(values=c("#FFE699")))+theme(axis.text.y = element_blank(),
                    axis.ticks.y = element_blank(),
                    axis.title.y = element_blank())+labs(x="Temperature legacy LGM"),
-                 Increase_size_axes(p1)+theme(axis.text.y = element_blank(),
+                 Increase_size_axes(p1+
+                                      scale_fill_manual(values=c("#F3A875"))+
+                                      scale_color_manual(values=c("#F3A875")))+theme(axis.text.y = element_blank(),
                    axis.ticks.y = element_blank(),
                    axis.title.y = element_blank())+labs(x="Isothermality legacy Holocene"),
                  # Increase_size_axes(p2)+theme(axis.text.y = element_blank(),
@@ -690,9 +699,10 @@ p_tot2=ggarrange(Increase_size_axes(p3)+labs(x="Isothermality legacy LGM"),
 p_tot=ggarrange(p_tot1,p_tot2,nrow=2,labels = letters[2:3],hjust = c(-2,-1))
 
 ggsave("./Figures/Partial_res.pdf",ggarrange(
-                                             ggarrange(ggplot()+theme_void(),p51+theme(axis.text.x = element_text(size=10)),p52+theme(axis.text.x = element_text(size=10)),
-                                                       ggplot()+theme_void(),ncol=4,
-                                                       widths = c(.6,1.5,1.5,.6),labels = c("a","","",""),hjust = -11,
+                                             ggarrange(ggplot()+theme_void(),p51+theme(axis.text.x = element_text(size=10)),ggplot()+theme_void(),
+                                                       p52+theme(axis.text.x = element_text(size=10)),
+                                                       ggplot()+theme_void(),ncol=5,
+                                                       widths = c(0,1.5,.4,1.5,.6),labels = c("a","","",""),hjust = -9,
                                                        font.label = list(size=15)),p_tot,nrow=2,heights = c(.5,1)),width = 10,height = 8)
 
 
@@ -790,8 +800,7 @@ for (ID_PC in 1:2){
            
            coord_flip()+
            the_theme2+
-           scale_fill_manual(values=c("LGM"="#FFF9BF", "Holocene"="#FFD2A0","Current"="pink","Env"="#C1E0B8",
-                                      "Shared past clim."="#DAB2BA","Other shared variance"="#E8E8E8"))+
+           scale_fill_manual(values=c("LGM"="#FFF9BF", "Holocene"="#FFD2A0","Current"="pink","Env"="#C1E0B8"))+
            labs(y="Mean Importance",x="",fill=""))
   
 }  
@@ -886,22 +895,22 @@ for (metric_id in list_spatial_metric){
   }
   
   
-  combined_d=cbind(cbind(Var_LGM),
-                   Var_Holo,
-                   cbind(Var_Current),
-                   # Var_Env,
-                   d$Struct1)
-  colnames(combined_d)[ncol(combined_d)]="Struct1"
-  train_id=sample(1:nrow(combined_d),round(.7*nrow(combined_d)))
+  # combined_d=cbind(cbind(Var_LGM),
+  #                  Var_Holo,
+  #                  cbind(Var_Current),
+  #                  # Var_Env,
+  #                  d$Struct1)
+  # colnames(combined_d)[ncol(combined_d)]="Struct1"
+  # train_id=sample(1:nrow(combined_d),round(.7*nrow(combined_d)))
   
-  if (any(colnames(combined_d)=="Desert_Current")){
-    combined_d[,"Desert_Current"]=as.factor(combined_d[,"Desert_Current"])
-  }
-  
-  if (any(colnames(combined_d)=="Desert_LGM")){
-    combined_d[,"Desert_LGM"]=as.factor(combined_d[,"Desert_LGM"])
-  }
-  
+  # if (any(colnames(combined_d)=="Desert_Current")){
+  #   combined_d[,"Desert_Current"]=as.factor(combined_d[,"Desert_Current"])
+  # }
+  # 
+  # if (any(colnames(combined_d)=="Desert_LGM")){
+  #   combined_d[,"Desert_LGM"]=as.factor(combined_d[,"Desert_LGM"])
+  # }
+  # 
   set.seed(123)
   train_id=sample(1:nrow(d),round(.7*nrow(d)))
   
@@ -930,8 +939,7 @@ for (metric_id in list_spatial_metric){
            
            coord_flip()+
            the_theme2+
-           scale_fill_manual(values=c("LGM legacy"="#FFF9BF", "Holocene legacy"="#FFD2A0","Current climate"="pink",
-                                      "Shared past clim."="#DAB2BA","Other shared variance"="#E8E8E8"))+
+           scale_fill_manual(values=c("LGM legacy"="#FFF9BF", "Holocene legacy"="#FFD2A0","Current climate"="pink"))+
            labs(y="Mean Importance",x="",fill=""))
   index=index+1
 }  
@@ -1340,8 +1348,7 @@ for (metric_id in list_spatial_metric){
            
            coord_flip()+
            the_theme2+
-           scale_fill_manual(values=c("LGM legacy"="#FFF9BF", "Holocene legacy"="#FFD2A0","Current climate"="pink",
-                                      "Shared past clim."="#DAB2BA","Other shared variance"="#E8E8E8"))+
+           scale_fill_manual(values=c("LGM legacy"="#FFF9BF", "Holocene legacy"="#FFD2A0","Current climate"="pink"))+
            labs(y="Mean Importance",x="",fill=""))
   index=index+1
 }  
@@ -1497,8 +1504,8 @@ for (id in 1:4){
            geom_ribbon(aes(x=Driver,y=Median,ymin=Lower,ymax=Upper,fill=Period),alpha=.4)+
            the_theme2+
            labs(x="",y="PC1: mean patch-size and cover",fill="")+
-           scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
-           scale_color_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
+           scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
+           scale_color_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
            theme(legend.text = element_text(size=12),strip.placement = "outside")+
            guides(color="none",fill="none"))
   
@@ -1542,8 +1549,8 @@ for (id in 1:4){
            geom_ribbon(aes(x=Driver,y=Median,ymin=Lower,ymax=Upper,fill=Period),alpha=.4)+
            the_theme2+
            labs(x="",y="PC2: spatial aggregation",fill="")+
-           scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
-           scale_color_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
+           scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
+           scale_color_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
            theme(legend.text = element_text(size=12),strip.placement = "outside")+
            guides(color="none",fill="none"))
   
@@ -1594,7 +1601,7 @@ p=ggplot(d%>%melt(., measure.vars=c("MAT_LGM","MAT_Current","MAT_Holocene",
   geom_histogram(aes(x=value,fill=Period))+
   the_theme2+
   facet_wrap(.~variable,scales="free")+
-  scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
+  scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
   labs(x="Value",y="Number of sites",fill="")
 
 ggsave("./Figures/SI/Distribution_climate_metrics.pdf",p,width = 7,height = 6)
@@ -1611,7 +1618,7 @@ p=ggplot(d%>%melt(., measure.vars=c("MAT_LGM","MAT_Current","MAT_Holocene",
   geom_histogram(aes(x=value,fill=Period))+
   the_theme2+
   facet_wrap(.~variable,scales="free")+
-  scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#A97858"))+
+  scale_fill_manual(values=c("LGM"="#FFE699","Holocene"="#F3A875","Current"="#FAC1CB"))+
   labs(x="Value",y="Number of sites",fill="")
 
 ggsave("./Figures/SI/Distribution_climate_metrics_nolegacy.pdf",p,width = 7,height = 6)

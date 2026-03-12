@@ -2,6 +2,7 @@ x=c("tidyverse","reshape2","car","lme4","DHARMa","jtools","raster","terra",
     "sf","missMDA","FactoMineR","factoextra","vegan","randomForestSRC",
     "R.utils","spatialwarnings","ggpubr","treemapify","gbm","psych","semEff")
 lapply(x, require, character.only = TRUE)
+#lapply(x, install.packages, character.only = TRUE)
 
 
 `%!in%` = Negate(`%in%`)
@@ -732,7 +733,17 @@ Plot_variance_partition=function(Var_part,merge_past=F,four_groups=T,bar=F){
         d_partition_var$Order=order(d_partition_var$R2)
         d_partition_var=mutate(d_partition_var,Name=fct_reorder(Name,Order,.desc = T))
         d_partition_var=arrange(d_partition_var,Order)
-        d_partition_var$Cumulated_R2=cumsum(d_partition_var$R2)
+        d_partition_var$Cumulated_R2=sapply(1:nrow(d_partition_var),
+                                            function(x){
+                                              if (x==1){
+                                                return(d_partition_var$R2[x]/2)
+                                              }else if (x==nrow(d_partition_var)){
+                                                return(sum(d_partition_var$R2)-d_partition_var$R2[x]/2)
+                                              }else{
+                                                return(sum(d_partition_var$R2[1:(x-1)])+d_partition_var$R2[x]/2)
+                                              }
+                                            })
+        
         
         p_tot=ggplot(d_partition_var, aes(x = ID, fill = Name,label=round(R2,2),y=R2)) +
           geom_bar(stat="identity")+
@@ -764,7 +775,16 @@ Plot_variance_partition=function(Var_part,merge_past=F,four_groups=T,bar=F){
         d_partition_var$Order=order(d_partition_var$R2)
         d_partition_var=mutate(d_partition_var,Name=fct_reorder(Name,Order,.desc = T))
         d_partition_var=arrange(d_partition_var,Order)
-        d_partition_var$Cumulated_R2=cumsum(d_partition_var$R2)
+        d_partition_var$Cumulated_R2=sapply(1:nrow(d_partition_var),
+                                            function(x){
+                                              if (x==1){
+                                                return(d_partition_var$R2[x]/2)
+                                              }else if (x==nrow(d_partition_var)){
+                                                return(sum(d_partition_var$R2)-d_partition_var$R2[x]/2)
+                                              }else{
+                                                return(sum(d_partition_var$R2[1:(x-1)])+d_partition_var$R2[x]/2)
+                                              }
+                                            })
         
         p_tot=ggplot(d_partition_var, aes(x = ID, fill = Name,label=round(R2,2),y=R2)) +
           geom_bar(stat="identity")+
@@ -796,7 +816,16 @@ Plot_variance_partition=function(Var_part,merge_past=F,four_groups=T,bar=F){
         }
         
         d_partition_var=arrange(d_partition_var,(R2))
-        d_partition_var$Cumulated_R2=cumsum(d_partition_var$R2)
+        d_partition_var$Cumulated_R2=sapply(1:nrow(d_partition_var),
+                                            function(x){
+                                              if (x==1){
+                                                return(d_partition_var$R2[x]/2)
+                                              }else if (x==nrow(d_partition_var)){
+                                                return(sum(d_partition_var$R2)-d_partition_var$R2[x]/2)
+                                              }else{
+                                                return(sum(d_partition_var$R2[1:(x-1)])+d_partition_var$R2[x]/2)
+                                              }
+                                            })
         d_partition_var$Order=1:nrow(d_partition_var)
         d_partition_var=mutate(d_partition_var,Name=fct_reorder(Name,Order,.desc = T))
         
@@ -830,7 +859,16 @@ Plot_variance_partition=function(Var_part,merge_past=F,four_groups=T,bar=F){
         d_partition_var$Order=order(d_partition_var$R2)
         d_partition_var=mutate(d_partition_var,Name=fct_reorder(Name,Order,.desc = T))
         d_partition_var=arrange(d_partition_var,Order)
-        d_partition_var$Cumulated_R2=cumsum(d_partition_var$R2)
+        d_partition_var$Cumulated_R2=sapply(1:nrow(d_partition_var),
+                                            function(x){
+                                              if (x==1){
+                                                return(d_partition_var$R2[x]/2)
+                                              }else if (x==nrow(d_partition_var)){
+                                                return(sum(d_partition_var$R2)-d_partition_var$R2[x]/2)
+                                              }else{
+                                                return(sum(d_partition_var$R2[1:(x-1)])+d_partition_var$R2[x]/2)
+                                              }
+                                            })
         
         p_tot=ggplot(d_partition_var, aes(x = ID, fill = Name,label=round(R2,2),y=R2)) +
           geom_bar(stat="identity")+
