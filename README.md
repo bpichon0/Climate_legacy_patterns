@@ -3,6 +3,9 @@
 > [!NOTE]
 > Contact: Benoît Pichon, **benoit.pichon0@gmail.com**
 
+<p align="center">
+    <img src="https://github.com/bpichon0/Climate_legacy_patterns/blob/master/Figures/legacy.jpg" width="800">
+</p>
 
 This repository contains the code used to perform the analyses for both main text and supplementary information.
 All the code was made on R (*v4.4.1*).
